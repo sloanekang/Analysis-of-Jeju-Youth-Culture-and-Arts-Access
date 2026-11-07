@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>제주 청년 문화예술 접근성 분석</title>
+<link rel="icon" href="data:,">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="data.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- 사이드바: 메뉴 + 필터 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">J</span>
+      <div><b>Analysis of Jeju Youth Culture and Arts Access</b><small>제주 청년 문화예술 접근성 분석</small></div>
+    </div>
+    <nav class="nav" id="nav" aria-label="섹션">
+      <a href="#overview" class="active"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3zm10 8h8V11h-8zM3 21h8v-6H3zm10-18v6h8V3z"/></svg>개요</a>
+      <a href="#sec-leisure"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5v5.4l4 2.4-1 1.7-5-3V7z"/></svg>수요 ① 여가 속 위치</a>
+      <a href="#sec-demand"><svg viewBox="0 0 24 24"><path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>수요 ② 관람과 희망</a>
+      <a href="#sec-base"><svg viewBox="0 0 24 24"><path d="M3 21V9l9-6 9 6v12h-6v-7H9v7z"/></svg>공급 ① 전국과 비교</a>
+      <a href="#sec-supply"><svg viewBox="0 0 24 24"><path d="M4 4h16v4H4zm0 6h10v4H4zm0 6h16v4H4z"/></svg>공급 ② 공연·전시 구성</a>
+      <a href="#sec-weekend"><svg viewBox="0 0 24 24"><path d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2zm12 8v10H5V10z"/></svg>주말의 선택지</a>
+      <a href="#sec-pass"><svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4zm8 1v2h2V7zm0 4v2h2v-2zm0 4v2h2v-2z"/></svg>청년문화예술패스</a>
+      <a href="#sec-link"><svg viewBox="0 0 24 24"><path d="M10.6 13.4a1 1 0 0 0 1.4 0l5-5a3 3 0 1 0-4.2-4.2l-1.5 1.5 1.4 1.4 1.5-1.5a1 1 0 0 1 1.4 1.4l-5 5a1 1 0 0 0 0 1.4zM13.4 10.6a1 1 0 0 0-1.4 0l-5 5a3 3 0 1 0 4.2 4.2l1.5-1.5-1.4-1.4-1.5 1.5a1 1 0 0 1-1.4-1.4l5-5a1 1 0 0 0 0-1.4z"/></svg>장르별 연결</a>
+      <a href="#sec-summary"><svg viewBox="0 0 24 24"><path d="M9 21h6v-2H9zm3-19a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>분석 결과</a>
+      <a href="#sec-sources"><svg viewBox="0 0 24 24"><path d="M12 3C7 3 3 4.8 3 7v10c0 2.2 4 4 9 4s9-1.8 9-4V7c0-2.2-4-4-9-4zm0 2c4.4 0 7 1.4 7 2s-2.6 2-7 2-7-1.4-7-2 2.6-2 7-2z"/></svg>데이터 기준</a>
+    </nav>
+
+    <div class="sb-filters">
+      <h2>필터</h2>
+      <p class="sb-sub first">공급 (공연·전시 목록)</p>
+      <div class="sb-field fk" id="box-period" style="--fc:#6d4fd8">
+        <span class="lbl">기간</span>
+        <div class="mp-pair"><span class="mp-btn" id="f-start-l"></span><span>~</span><span class="mp-btn" id="f-end-l"></span></div>
+        <div class="range" id="range">
+          <div class="range-track"><div class="range-fill" id="range-fill"></div></div>
+          <input type="range" id="f-range-a" min="0" max="0" step="1" aria-label="시작 월">
+          <input type="range" id="f-range-b" min="0" max="0" step="1" aria-label="종료 월">
+        </div>
+        <div class="range-lbl"><span id="range-min"></span><span id="range-max"></span></div>
+      </div>
+      <label class="sb-field fk" id="box-genre" style="--fc:#d6336c"><span class="lbl">장르</span><select id="f-genre"></select></label>
+      <label class="sb-field fk" id="box-area" style="--fc:#0f9d94"><span class="lbl">지역</span><select id="f-area"></select></label>
+      <label class="sb-field fk" id="box-target" style="--fc:#e8590c"><span class="lbl">대상 <small>KOPIS 아동공연 표시 기준</small></span><select id="f-target">
+        <option value="all">전체</option><option value="noChild">아동·가족 공연 제외</option><option value="child">아동·가족 공연만</option></select></label>
+      <label class="sb-field fk" id="box-price" style="--fc:#2f6fe0"><span class="lbl">요금</span><select id="f-price">
+        <option value="all">전체</option><option value="free">무료</option><option value="paid">유료</option></select></label>
+      <label class="sb-check fk" id="box-tour" style="--fc:#5f6b85"><input type="checkbox" id="f-tour" checked> 관광 상설공연 제외</label>
+
+      <p class="sb-sub">수요 (설문)</p>
+      <button type="button" class="btn-age" id="f-1934" title="청년통계와 문화지표를 19~34세로 맞춥니다">19~34세로 보기</button>
+      <label class="sb-field fk" id="box-year" style="--fc:#7a4fd0"><span class="lbl">청년통계 연도</span><select id="f-year"></select></label>
+      <label class="sb-field fk" id="box-group" style="--fc:#b5179e"><span class="lbl">청년 집단 <small>한 번에 하나</small></span><select id="f-group"></select></label>
+      <label class="sb-field fk" id="box-cohort" style="--fc:#c2410c"><span class="lbl">문화지표 연령</span><select id="f-cohort">
+        <option value="20">20대</option><option value="30">30대</option><option value="all">도민 전체</option><option value="1934">19~34세 (집계 자료 없음)</option></select></label>
+      <button id="f-reset" type="button" class="btn-reset">필터 초기화</button>
+    </div>
+    <p class="sb-note">패널 배지가 <b>진하게 칠해져 있으면</b> 그 필터가 지금 범위를 좁히고 있다는 뜻입니다. 항목 제목 옆의 연령 표시는 그 값이 어떤 연령 기준인지 알려 줍니다. 분홍은 지금 필터에 맞춰 좁혀진 값, 회색은 필터와 상관없는 값입니다. 배지가 연하면 필터가 적용되지만 '전체'가 선택된 상태이고, 회색이면 그 자료에 해당 정보가 없어 필터가 적용되지 않습니다.</p>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button type="button" class="sb-toggle" id="sb-toggle" aria-label="메뉴 열기" aria-controls="sidebar" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="tb-title">
+        <h1>제주 청년의 여가, 문화예술 공급과 수요는 만나고 있을까?</h1>
+        <p id="hdr-period">-</p>
+      </div>
+      <div class="pills" id="tb-presets" role="group" aria-label="기간 빠른 선택"></div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+        <input type="search" id="q-search" placeholder="공연·전시·공연장 찾기" autocomplete="off" aria-label="공연·전시·공연장 찾기">
+        <div class="q-results" id="q-results" hidden></div>
+      </div>
+    </header>
+
+    <div class="fbar">
+      <div class="fchips" id="fchips" aria-label="적용 중인 필터"></div>
+      <button type="button" class="btn-report" id="btn-print" title="현재 필터 기준 화면을 인쇄하거나 PDF로 저장합니다">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3 1.4 1.4L12 17.4l-5.7-5.7 1.4-1.4 3.3 3.3V4a1 1 0 0 1 1-1zM5 19h14v2H5z"/></svg>
+        <span>인쇄·PDF 저장</span>
+      </button>
+    </div>
+    <p id="lib-warn" class="notice" hidden></p>
+
+    <!-- 개요 -->
+    <section id="overview" class="sec">
+      <section class="card concl" id="concl">
+        <div class="card-head"><h2>이번 분석의 결론: 우리가 해결해야 할 문제</h2><span class="tagy">필터와 무관 · 2025년 기준</span></div>
+        <p class="concl-lead" id="c-lead"></p>
+        <div class="problem">
+          <span class="problem-k">문제정의문</span>
+          <blockquote id="c-problem"></blockquote>
+          <p class="one-line"><b>한 문장 요약</b> <span id="c-one"></span></p>
+        </div>
+        <p class="why"><b>이 문제가 중요한 이유</b> <span id="c-why"></span></p>
+        <h3 class="mt">네 가지 관점으로 본 제주 <small>숫자를 누르면 근거가 있는 탭으로 이동합니다</small></h3>
+        <div class="views" id="c-views"></div>
+        <p class="fine" id="c-view-note"></p>
+        <h3 class="mt">다음에 확인할 질문</h3>
+        <p class="next-lead" id="c-next-lead"></p>
+        <ol class="next" id="c-next"></ol>
+        <p class="fine" id="c-next-end"></p>
+      </section>
+      <h3 class="ov-sub">현재 필터 기준 지표 <small>왼쪽 필터를 바꾸면 아래 값이 바뀝니다</small></h3>
+      <div class="kpis">
+        <div class="card kpi">
+          <h2>공연·전시 공급</h2>
+          <div class="big" id="k-supply">-</div><p class="sub" id="k-supply-sub"></p>
+        </div>
+        <div class="card kpi kpi-ring">
+          <h2>연극·뮤지컬이 없던 주말</h2>
+          <div class="ring-row"><div class="ring" id="k-wk-ring"></div><div class="big" id="k-wk">-</div></div>
+          <p class="sub" id="k-wk-sub"></p>
+        </div>
+        <div class="card kpi kpi-ring">
+          <h2>주말 주된 여가가 문화예술</h2>
+          <div class="ring-row"><div class="ring" id="k-leisure-ring" style="--c:var(--pink)"></div><div class="big" id="k-leisure">-</div></div>
+          <p class="sub" id="k-leisure-sub"></p>
+        </div>
+        <div class="card kpi kpi-ring">
+          <h2>도내 문화예술 관람 경험</h2>
+          <div class="ring-row"><div class="ring" id="k-view-ring" style="--c:var(--pink)"></div><div class="big" id="k-view">-</div></div>
+          <p class="sub" id="k-view-sub"></p>
+        </div>
+        <div class="card kpi">
+          <h2>참고: 1인당 티켓 판매</h2>
+          <div class="big" id="k-tix">-</div><p class="sub" id="k-tix-sub"></p>
+        </div>
+      </div>
+
+      <div class="ov-grid">
+        <section class="card" id="sec-bf">
+          <div class="card-head"><h2>장르별 공급과 청년 수요 <span class="badges" id="b-bf"></span></h2></div>
+          <p class="desc">왼쪽은 선택 기간에 열린 공연·전시 건수, 오른쪽은 <b id="bf-cohort">20대</b>의 1순위 응답 비율입니다. 양쪽은 단위와 조사 대상이 달라 서로 빼거나 나누어 비교하지 않습니다. 같은 행에서 어느 쪽으로 기우는지만 봅니다.</p>
+          <div id="bf"></div>
+          <p class="fine">공연은 KOPIS 목록, 미술 전시회는 제주문예회관·서귀포예술의전당 전시실과 제주돌문화공원 일정만 셉니다. 영화·문학행사는 공급 목록이 없어 '집계 자료 없음'으로 두었습니다(0건이라는 뜻이 아닙니다). 수요의 '연극·뮤지컬'은 조사 보기 하나로 물은 값이고, 축제·전통체험 등은 관광축제·예술축제·전통문화체험·무속공연·기타를 더한 값입니다.</p>
+          <details><summary>상세 표</summary><div id="t-bf"></div></details>
+        </section>
+
+        <div class="ov-side">
+          <section class="card mini">
+            <div class="card-head"><h2>공연이 많은 장르 TOP 5</h2><a href="#sec-supply" class="more">전체 보기</a></div>
+            <ol class="toplist" id="ov-supply"></ol>
+          </section>
+          <section class="card mini">
+            <div class="card-head"><h2 id="ov-want-h">보고 싶은 분야 TOP 5</h2><a href="#sec-demand" class="more">전체 보기</a></div>
+            <ol class="toplist pink" id="ov-want"></ol>
+          </section>
+          <section class="card mini">
+            <div class="card-head"><h2 id="ov-bar-h">관람을 막는 요인 TOP 3</h2><a href="#sec-demand" class="more">전체 보기</a></div>
+            <div class="ring-cards" id="ov-barrier"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- 수요 ① -->
+    <section class="sec" id="sec-leisure">
+      <div class="sec-head"><span class="eyebrow pink">수요 ①</span><h2>주말 여가 속 문화예술의 위치</h2><span class="badges" id="b-leisure"></span>
+        <p>제주 청년통계(19~39세). 표에 교차 분류가 없어 연령·성별·권역 같은 집단은 한 번에 하나만 고를 수 있습니다.</p></div>
+      <p class="notice" id="leisure-warn" hidden></p>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>주말·휴일 여가활용 순위</h2>
+            <div class="seg-toggle" id="l-mode" role="group" aria-label="응답 기준"><button type="button" data-v="main">주된 응답</button><button type="button" data-v="multi">1·2순위 복수응답</button></div></div>
+          <p class="desc" id="l-rank-desc"></p>
+          <div id="l-rank"></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>조사 연도별 문화예술 비중</h2></div>
+          <p class="desc">같은 집단의 '문화예술 관람·참여' 응답입니다. 2019년은 보기 구성이 달라 가는 선으로 구분했습니다.</p>
+          <div id="l-years"></div>
+          <div id="l-years-t"></div>
+          <p class="fine">'응답 중 비중'은 복수응답 값 ÷ 복수응답 합계입니다. 2022년은 복수응답 합계가 다른 해보다 낮아(2순위를 답하지 않은 응답이 많은 것으로 보임) 복수응답 값끼리 곧바로 비교하면 실제보다 달라 보일 수 있습니다. 보기 문구가 바뀐 2019년과의 차이는 실제 변화로 볼 수 없습니다.</p>
+        </section>
+      </div>
+      <div class="grid3">
+        <section class="card">
+          <div class="card-head"><h2>여가를 함께하는 사람</h2></div>
+          <div id="l-company"></div>
+          <p class="fine">여가를 혼자 보내는 것과 혼자라서 관람을 못 가는 것은 다릅니다.</p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>주로 가는 문화·여가 지역 <small class="tagy">2025</small></h2></div>
+          <div id="l-place"></div>
+          <p class="fine" id="l-visit"></p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>문화·여가생활 전반 만족도</h2></div>
+          <div id="l-sat"></div>
+          <p class="fine">제주 안의 문화·여가생활 전반을 물은 값입니다. 스포츠·여행·청년 공간까지 들어가므로 문화예술 '관람'의 불만족으로 볼 수 없습니다.</p>
+        </section>
+      </div>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>불만족 사유</h2></div>
+          <p class="desc" id="l-reason-desc"></p>
+          <div id="l-reason"></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>필요한 문화·여가 정책</h2></div>
+          <p class="desc" id="l-policy-desc"></p>
+          <div id="l-policy"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- 수요 ② -->
+    <section class="sec" id="sec-demand">
+      <div class="sec-head"><span class="eyebrow pink">수요 ②</span><h2>청년은 무엇을 보고, 무엇을 보고 싶어 할까</h2><span class="badges" id="b-demand"></span>
+        <p>2025 제주문화지표 도민 인식조사(2025.12, 20대 228명·30대 263명, 가중 후). 연령 구분이 청년통계와 달라 두 조사를 한 표에 섞지 않습니다.</p></div>
+      <p class="notice" id="d-na" hidden></p>
+      <div class="ring-cards wide four" id="d-rings"></div>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>최근 관람한 분야와 앞으로 보고 싶은 분야</h2>
+            <div class="seg-toggle" id="d-mode" role="group" aria-label="순위 기준"><button type="button" data-v="1">1순위</button><button type="button" data-v="123">1+2+3순위</button></div></div>
+          <p class="desc">'최근 관람'은 관람자만 답했고 '향후 희망'은 누가 답했는지 보고서에 나와 있지 않습니다. 그래서 두 값의 차이를 '채워지지 않은 수요'의 크기로 계산하지 않습니다.</p>
+          <div id="d-pair"></div>
+          <p class="fine" id="d-pair-src"></p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>도내 관람을 막는 요인</h2></div>
+          <p class="desc">가장 큰 요인 1개를 고른 비율입니다. 영향의 크기가 아니며, 비관람자만 답했는지 보고서에 나와 있지 않습니다. 막대 위 세로선은 도민 전체 값입니다.</p>
+          <div id="d-barrier"></div>
+          <p class="fine">표 3-14, 1순위.</p>
+        </section>
+      </div>
+      <div class="grid3">
+        <section class="card">
+          <div class="card-head"><h2>관람을 늘리려면 필요한 것</h2></div>
+          <div id="d-need"></div>
+          <p class="fine">표 3-19·3-20, 1순위. 막대 위 세로선은 도민 전체 값입니다.</p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>어디서 보나</h2></div>
+          <div id="d-place"></div>
+          <p class="fine">표 3-12, 관람자 기준. 막대 위 세로선은 도민 전체 값입니다.</p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>향유 환경 긍정 비율</h2></div>
+          <div id="d-env"></div>
+          <p class="fine">표 3-44. 항목 간 차이가 작아 이 표만으로 우선순위를 정하지 않습니다.</p>
+        </section>
+      </div>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>질문에 따라 달라지는 답</h2></div>
+          <p class="desc">'무엇이 막는가'와 '무엇이 필요한가'는 다른 질문입니다. 한쪽 답만으로 원인을 단정할 수 없습니다.</p>
+          <div id="d-qa"></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>제주 밖에서 채우는 수요</h2></div>
+          <p class="desc">국민문화예술활동조사에서 사는 곳이 아닌 다른 시·도에서 관람했다고 답한 비율입니다. 제주 값은 전 연령이고 관람자 표본이 수십 명 이하라 해마다 크게 흔들립니다.</p>
+          <div id="k-outside"></div>
+          <p class="fine">n은 그 장르 관람자 표본수입니다. 표본 30명 미만은 흐리게 표시했습니다. 전국 값에는 경기와 서울을 오가는 것처럼 같은 생활권 안의 이동도 들어 있어, 비행기를 타야 하는 제주의 도외 관람과 뜻이 다릅니다. 제주의 연령별 값은 원표에 없습니다.</p>
+          <div id="d-out"></div>
+        </section>
+      </div>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>같은 응답자의 관람과 관람 의향 <small class="tagy">2025</small></h2>
+            <label class="inline-filter">대상<select id="f-apop"></select></label></div>
+          <p class="desc">국민문화예술활동조사 복수응답입니다. 두 값 모두 전체 표본이 분모라 위쪽 문화지표 차트보다 비교하기 좋습니다. 다만 관람은 지역을 가리지 않고 세며, 의향은 어디서 보고 싶은지 묻지 않습니다.</p>
+          <div id="k-pair"></div>
+          <p class="fine" id="k-pair-note"></p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>관람 걸림돌: 제주와 전국 청년 <small class="tagy">2025</small></h2></div>
+          <p class="desc">국민문화예술활동조사입니다. 제주는 전 연령, 20대·30대는 전국 값이라 '제주 청년' 수치가 아닙니다. 각 열의 1위를 굵게 표시했습니다.</p>
+          <div id="k-barrier"></div>
+          <p class="fine" id="k-barrier-note"></p>
+          <h3 class="mt">지난 1년 한 번 이상 참여 <small>국민여가활동조사 2025</small></h3>
+          <div id="t-national"></div>
+          <p class="fine">같은 영화 관람도 국민여가활동조사 제주 16.5%, 국민문화예술활동조사 58.7%, 사회조사 73.9%로 조사마다 크게 다릅니다. 문항과 대상이 달라 서로 섞어 비교할 수 없습니다.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- 공급 ① -->
+    <section class="sec" id="sec-base">
+      <div class="sec-head"><span class="eyebrow">공급 ①</span><h2>전국과 비교한 공급과 이용</h2><span class="badges" id="b-base"></span>
+        <p>시설과 활동은 전국보다 많지만 유료 판매는 적습니다. 이 탭의 수치는 전 연령 기준이라 필터가 적용되지 않습니다.</p></div>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>제주 ÷ 전국 배율</h2></div>
+          <p class="desc">가운데 선이 전국 수준(1배)입니다. 로그 눈금이라 2배와 0.5배의 거리가 같습니다.</p>
+          <div id="b-ratio"></div>
+          <div class="lg"><span><i style="background:var(--accent)"></i>전국보다 많음</span><span><i style="background:var(--amber)"></i>전국보다 적음</span></div>
+          <p class="fine">문예연감은 유·무료를 가리지 않고 행사 건수를 세고, KOPIS는 전산 발권 공연만 집계합니다. 연도와 집계 대상이 달라 두 수치를 직접 나누지 않습니다. 판매가 적은 것은 비수도권에 공통된 현상일 수 있습니다(강원 1인당 0.185장).</p>
+          <details><summary>상세 표</summary><div id="t-ratio"></div></details>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>시도 순위</h2>
+            <label class="inline-filter">지표<select id="f-metric"></select></label></div>
+          <p class="desc" id="b-rank-desc"></p>
+          <div id="b-rank"></div>
+          <p class="fine" id="b-rank-note"></p>
+        </section>
+      </div>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>활동 건수의 장르 구성 <small class="tagy">2024</small></h2></div>
+          <p class="desc">문예연감 활동 건수 중 각 장르의 비중입니다. 유·무료를 모두 셉니다.</p>
+          <div id="b-yearbook"></div>
+          <p class="fine">공연 '횟수'는 제주가 인구 대비 전국 1위지만 관광 상설공연이 크게 반영된 값입니다. 공급량 지표로 쓰지 않습니다.</p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>활동이 많은 시설 상위 5곳 <small class="tagy">2024</small></h2></div>
+          <p class="desc" id="b-top-desc"></p>
+          <ol class="toplist" id="b-top"></ol>
+        </section>
+      </div>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>같은 장르인데 조사마다 다른 전국 대비 방향 <small class="tagy">2025</small></h2></div>
+          <p class="desc">제주가 전국보다 많이 보는지는 어느 조사를 쓰느냐에 따라 달라집니다. 문항과 장르 범위가 달라 한 조사만으로 "높다·낮다"를 단정할 수 없습니다. 모두 전 연령 값입니다.</p>
+          <div id="t-survey"></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>전시관 현황 <small class="tagy">2026.03</small></h2></div>
+          <p class="desc" id="b-hall-desc"></p>
+          <div class="attrs two">
+            <div><h3>운영 주체</h3><div id="b-hall-type"></div></div>
+            <div><h3>행정시</h3><div id="b-hall-city"></div></div>
+          </div>
+          <p class="fine">주소에 읍·면이 적히지 않은 곳은 읍면으로 세지 않아 실제보다 적을 수 있습니다. 등록 박물관·미술관이 이 목록에 들어 있는지는 원자료 설명을 보고 확인해야 합니다.</p>
+          <details><summary>전시관 목록</summary><div id="t-hall"></div></details>
+        </section>
+      </div>
+      <section class="card">
+        <div class="card-head"><h2>KOPIS 등록 공연시설 <small class="tagy">2025</small></h2></div>
+        <p class="desc" id="b-fac-desc"></p>
+        <div class="attrs">
+          <div><h3>시설 성격</h3><div id="b-fac-type"></div></div>
+          <div><h3>행정시</h3><div id="b-fac-city"></div></div>
+          <div><h3>판매 상위 5곳 <small>장</small></h3><div id="b-fac-top"></div></div>
+        </div>
+        <p class="fine" id="b-fac-note"></p>
+        <details><summary>시설 목록</summary><div id="t-fac"></div></details>
+      </section>
+    </section>
+
+    <!-- 공급 ② -->
+    <section class="sec" id="sec-supply">
+      <div class="sec-head"><span class="eyebrow">공급 ②</span><h2>공연·전시는 언제, 어디서, 누구를 위해 열리나</h2><span class="badges" id="b-supply"></span>
+        <p>공연은 KOPIS 공연 목록, 전시는 제주문예회관·서귀포예술의전당 전시실, 제주돌문화공원, 국립제주박물관 일정입니다. 선택 기간에 하루라도 열리면 셉니다.</p></div>
+      <p class="notice" id="cov-note"></p>
+      <div class="sdetail" id="show-detail" hidden aria-live="polite"></div>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>월별 개막 건수</h2></div>
+          <p class="desc">필터를 적용한 목록을 시작 월 기준으로 셉니다.</p>
+          <div class="chart-box h260"><canvas id="c-open"></canvas></div>
+          <p class="notice" id="open-empty" hidden></p>
+          <p class="fine" id="ex-note"></p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>제주 KOPIS 월별 추이</h2>
+            <label class="inline-filter">지표<select id="f-kmetric">
+              <option value="sold">판매수(취소 제외)</option><option value="amt">판매액</option><option value="open">개막 편수</option><option value="times">상연 횟수</option></select></label></div>
+          <p class="desc">지역 합계만 제공되어 장르·대상 필터가 적용되지 않습니다. 연도별로 선을 나눠 같은 달끼리 비교합니다.</p>
+          <div class="chart-box h260"><canvas id="c-sales"></canvas></div>
+        </section>
+      </div>
+      <section class="card">
+        <div class="card-head"><h2>공연의 속성</h2></div>
+        <p class="desc" id="a-desc"></p>
+        <div class="attrs">
+          <div><h3>운영 기간</h3><div id="a-run"></div></div>
+          <div><h3>대상</h3><div id="a-target"></div></div>
+          <div><h3>요금 <small>최저가 기준</small></h3><div id="a-price"></div></div>
+          <div><h3>요일·시간대 <small>복수</small></h3><div id="a-slot"></div></div>
+          <div><h3>지역</h3><div id="a-area"></div></div>
+          <div><h3>공연장 주체</h3><div id="a-prov"></div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2>공연장 분포</h2></div>
+        <p class="desc" id="v-desc"></p>
+        <p class="notice" id="map-warn" hidden></p>
+        <div class="pair">
+          <div id="venue-map" class="map"></div>
+          <div><h3>공연장 순위 (상위 12)</h3><div id="t-venue" class="pair-tbl"></div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2>제주 지역축제 <small class="tagy">2025 계획</small></h2></div>
+        <p class="desc" id="f-desc"></p>
+        <div class="attrs">
+          <div><h3>축제 유형 <small>복수</small></h3><div id="f-type"></div></div>
+          <div><h3>시작 월</h3><div id="f-month"></div></div>
+          <div><h3>연도별 제주 건수</h3><div id="f-trend"></div></div>
+        </div>
+        <p class="fine" id="f-note"></p>
+        <details><summary>축제 목록</summary><div id="t-fest"></div></details>
+      </section>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>공연·전시 목록</h2><button type="button" class="btn-ghost" id="btn-csv">CSV 내려받기</button></div>
+          <p class="desc" id="list-desc"></p>
+          <div id="t-list" class="list-tbl"></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>참고: 지금 등록된 행사</h2></div>
+          <p class="desc" id="snap-desc"></p>
+          <div id="snap"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- 주말의 선택지 -->
+    <section class="sec" id="sec-weekend">
+      <div class="sec-head"><span class="eyebrow">공급과 수요의 접점</span><h2>평범한 주말에 볼 수 있는 공연이 있었을까</h2><span class="badges" id="b-weekend"></span>
+        <p>토·일 중 하루라도 열린 공연을 주말마다 셉니다. 공연 기간과 KOPIS 공연 시간표의 요일을 함께 봅니다. 전시는 넣지 않습니다. 공공 전시장 4곳의 일정만 있어 주말 공백을 판단할 수 없습니다.</p></div>
+      <div class="w-grid">
+        <section class="card">
+          <div class="tiles" id="w-tiles"></div>
+          <div class="card-head mt"><h3>주말 달력 <small>칸의 숫자 = 그 주말에 열린 공연 수 · 칸을 누르면 목록</small></h3>
+            <button type="button" class="btn-ghost" id="w-quick"></button></div>
+          <div id="w-cal"></div>
+          <div class="lg" id="w-legend"></div>
+        </section>
+        <div class="ov-side">
+          <section class="card">
+            <div class="card-head"><h2>장르별 빈 주말</h2></div>
+            <p class="desc" id="w-gap-desc"></p>
+            <div id="w-gap"></div>
+          </section>
+          <section class="card">
+            <div class="card-head"><h2 id="w-list-h">선택한 주말</h2></div>
+            <div id="w-list"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- 청년문화예술패스 -->
+    <section class="sec" id="sec-pass">
+      <div class="sec-head"><span class="eyebrow pink">정책</span><h2>청년문화예술패스: 제주는 발급률이 17개 시도 중 가장 낮다</h2>
+        <p>발급률은 지원 대상 중 패스를 받은 사람의 비율(기사에서는 '신청률'이라고도 씀), 집행률은 배정 예산 중 실제로 쓴 금액의 비율입니다. 문체부·한국문화예술위원회가 시도별 원표를 공개하지 않아 언론·의원실·정책 브리프에 인용된 값만 모았습니다. <b class="jeju-txt">제주</b>는 주황색으로 표시했습니다.</p></div>
+      <section class="card">
+        <div class="tiles" id="p-tiles"></div>
+      </section>
+      <div class="grid2">
+        <section class="card">
+          <div class="card-head"><h2>발급률(신청률) 시도 비교</h2></div>
+          <p class="desc">같은 자료·같은 시점끼리만 묶었습니다. 막대 위에 마우스를 올리면 계산식과 출처가 보입니다.</p>
+          <div class="lg pass-lg"><span><i class="jeju"></i>제주</span><span><i class="other"></i>다른 시도</span><span><i class="nat"></i>전국</span></div>
+          <div id="p-issue"></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>집행률(예산 대비 이용률) 시도 비교</h2></div>
+          <p class="desc">배정 예산 중 패스로 쓴 금액의 비율입니다. 청년이 공연을 본 비율이 아닙니다.</p>
+          <div class="lg pass-lg"><span><i class="jeju"></i>제주</span><span><i class="other"></i>다른 시도</span><span><i class="nat"></i>전국</span></div>
+          <div id="p-use"></div>
+        </section>
+      </div>
+      <section class="card">
+        <div class="card-head"><h2>제주 집행률 추이</h2></div>
+        <p class="desc">시점과 산식이 조금씩 다른 값을 순서대로 놓았습니다. 2026년은 영화·도서가 사용처에 들어온 뒤의 중간값이라 앞 연도와 바로 비교하지 않습니다.</p>
+        <div id="p-trend"></div>
+        <h3 class="mt">함께 볼 사실</h3>
+        <ul class="facts" id="p-facts"></ul>
+        <details><summary>출처</summary><div id="t-pass"></div></details>
+      </section>
+    </section>
+
+    <!-- 장르별 연결 -->
+    <section class="card sec" id="sec-link">
+      <div class="card-head"><h2>장르별로 이어 보기 <span class="badges" id="b-link"></span></h2></div>
+      <p class="desc">공급과 청년 반응이 어긋나는 모습은 장르마다 다릅니다. 가설의 근거 수준을 함께 표시합니다. 판매 비중은 관광객 구매와 상설공연이 섞인 2024년 값입니다.</p>
+      <div id="t-link"></div>
+      <div class="lg ev-lg"><span class="ev f">확인</span> 원표에서 확인 <span class="ev i">해석</span> 자료에서 해석한 방향 <span class="ev a">가정</span> 검증 필요 <span class="ev n">집계 자료 없음</span> 판단 불가</div>
+    <h3 class="sub-h">제주 예매 순위로 본 장르 <small class="tagy">2025 월별</small></h3>
+      <p class="desc" id="k-box-desc"></p>
+      <div class="attrs two">
+        <div><h3>월별 1위</h3><div id="k-box-first"></div></div>
+        <div><h3>월별 상위 10위</h3><div id="k-box-top"></div></div>
+      </div>
+      <p class="fine">KOPIS 예매상황판은 순위만 주고 판매수를 주지 않습니다. 전 연령이고 도민과 관광객을 나누지 않아 청년의 선호로 볼 수 없습니다. 위 필터는 적용되지 않습니다.</p>
+      <details><summary>월별 1위 공연</summary><div id="t-box"></div></details>
+    </section>
+
+    <!-- 분석 결과 -->
+    <section class="sec" id="sec-summary">
+      <div class="sec-head"><span class="eyebrow">분석 결과</span><h2>결론과 문제정의문, 현재 필터 기준 요약</h2>
+        <p>결론 카드는 2025년 기준이고, 아래 요약은 왼쪽 필터에 따라 바뀝니다.</p></div>
+      <section class="card concl" id="concl-copy" aria-label="이번 분석의 결론"></section>
+      <section class="card" id="sum-card">
+        <div class="card-head"><h2>분석 결과 요약 <small class="desc">(현재 필터 기준)</small></h2></div>
+        <div class="summary">
+          <div><h3>확인된 사실</h3><ul id="s-fact"></ul></div>
+          <div><h3>해석 및 가설 <small>(검증 전)</small></h3><ul id="s-interp"></ul></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- 데이터 기준 -->
+    <section class="card sec" id="sec-sources">
+      <div class="card-head"><h2>데이터 기준 · 집계 방식</h2></div>
+      <p class="desc">자료마다 대상과 기간이 다릅니다. 표에 적은 기준 안에서만 비교합니다. 기획 대상은 만 19~34세입니다. 공표 자료는 19~39세 또는 20대·30대로 집계돼 있어, 19~34세 값은 청년통계에서만 연령별 값을 가중 평균해 계산했습니다. 문화지표·국민조사·사회조사의 19~34세 값은 집계 자료 없음입니다.</p>
+      <div id="t-sources"></div>
+      <h3 class="mt">항목별 연령 기준</h3>
+      <p class="desc">표의 연령은 자료가 공표한 구간입니다. 연령 필터가 걸리지 않는 항목은 필터를 바꿔도 값이 같습니다. 비율에 마우스를 올리면 비교수(분자)와 기준수(분모)가 보입니다.</p>
+      <div id="t-age"></div>
+      <h3 class="mt">값이 없을 때의 표기</h3>
+      <p class="desc"><b>집계 자료 없음</b>은 원표나 통계에 그 구간의 값이 없다는 뜻입니다. <b>알 수 없음</b>은 개별 공연·전시·시설 정보가 비어 있다는 뜻입니다. 둘 다 0이 아닙니다.</p>
+      <h3 class="mt">이 자료로 말할 수 없는 것</h3>
+      <ul class="dont" id="s-dont"></ul>
+      <p class="notice mt"><b>통계표 연결 주의</b> 서로 다른 통계표(또는 같은 조사의 구·신 통계표)를 연결한 자료입니다. 지수개편·모집단 변경 등으로 통계표 간 정의가 상이할 수 있으므로 주의가 필요합니다. (해당: 청년통계 연도 비교, KOPIS 판매 ÷ 주민등록인구 계산)</p>
+      <p class="fine" id="gen-time"></p>
+    </section>
+  </main>
+  <div class="sb-backdrop" id="sb-backdrop" hidden></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
